@@ -56,33 +56,30 @@ const treatmentsFile = "C:\\Users\\User\\Desktop\\Case Automation\\treatments.tx
 async function parsePDF(filePath) {
 
 function extractShades(shadeString) {
-  // Try to find a pattern like "-/C1/-"
-  const match = shadeString.match(/-?\s*\/\s*-?\s*\/\s*-?/);
+  // Try to extract 3 parts separated by slashes, allowing "-" or shade text like "3M2"
+  const regex = /([A-Z0-9\-]+)?\s*\/\s*([A-Z0-9\-]+)?\s*\/\s*([A-Z0-9\-]+)?/i;
+  const match = shadeString.match(regex);
+
   if (!match) {
-    // Try broader match, like: "-/C1/-"
-    const parts = shadeString.split('/');
-    if (parts.length === 3) {
-      const [incisal, body, gingival] = parts.map(p => p.trim());
-
-      // If all three are valid date components (e.g. 08/04/2025), then it's probably a date
-      const isDate =
-        /^\d+$/.test(incisal) &&
-        /^\d+$/.test(body) &&
-        /^\d+$/.test(gingival) &&
-        !isNaN(Date.parse(`${body}/${incisal}/${gingival}`));
-
-      if (isDate) {
-        return ['-', '-', '-']; // It's a date, not a shade
-      }
-
-      return [incisal || '-', body || '-', gingival || '-'];
-    }
+    return ['-', '-', '-']; // no match, return default
   }
 
-  return ['-', '-', '-'];
+  let [, incisal, body, gingival] = match;
+
+  incisal = incisal ? incisal.trim() : '-';
+  body = body ? body.trim() : '-';
+  gingival = gingival ? gingival.trim() : '-';
+
+  // Check if this looks like a date (all numeric and valid date)
+  const isDate = [incisal, body, gingival].every(part => /^\d+$/.test(part)) &&
+    !isNaN(Date.parse(`${body}/${incisal}/${gingival}`));
+
+  if (isDate) {
+    return ['-', '-', '-']; // it's a date, not shades
+  }
+
+  return [incisal, body, gingival];
 }
-
-
 
 
 
