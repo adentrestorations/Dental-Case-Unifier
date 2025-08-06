@@ -1,0 +1,13 @@
+2025/07/15-14:18:09.351 6490 Reusing MANIFEST C:\Users\User\Desktop\BotWIP\dental-case-unifier\server\shining-profile\Default\Local Storage\leveldb/MANIFEST-000001
+2025/07/15-14:18:09.357 6490 Recovering log #10
+2025/07/15-14:18:09.358 6490 Level-0 table #12: started
+2025/07/15-14:18:09.363 6490 Level-0 table #12: 225254 bytes OK
+2025/07/15-14:18:09.366 6490 Delete type=0 #10
+2025/07/15-14:18:09.366 4d3c Compacting 4@0 + 0@1 files
+2025/07/15-14:18:09.374 4d3c Generated table #14@0: 10 keys, 235571 bytes
+2025/07/15-14:18:09.374 4d3c Compacted 4@0 + 0@1 files => 235571 bytes
+2025/07/15-14:18:09.375 4d3c compacted to: files[ 0 1 0 0 0 0 0 ]
+2025/07/15-14:18:09.376 4d3c Delete type=2 #3
+2025/07/15-14:18:09.376 4d3c Delete type=2 #6
+2025/07/15-14:18:09.376 4d3c Delete type=2 #9
+2025/07/15-14:18:09.376 4d3c Delete type=2 #12

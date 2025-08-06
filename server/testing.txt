@@ -1,0 +1,69 @@
+const puppeteer = require('puppeteer');
+const path = require('path');
+
+const CHROME_PATH = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe'; // or your actual Chrome path
+const PROFILE_PATH = 'C:\\Users\\User\\AppData\\Local\\Google\\Chrome\\User Data';
+
+const patientName = "Firstname Lastname";
+
+async function loginAndFillWinvoice(username, password) {
+  const browser = await puppeteer.launch({
+    headless: false,
+    executablePath: CHROME_PATH,
+    userDataDir: PROFILE_PATH,
+    args: ['--no-default-browser-check', '--disable-popup-blocking'],
+    });
+
+    const pages = await browser.pages();
+    const page = pages.length > 0 ? pages[0] : await browser.newPage();
+    await page.goto('https://adent.winvoice.com/', { waitUntil: 'domcontentloaded' });
+
+
+  await page.click('.navbar-burger');
+
+  await page.click('#ctl00_LoginStatus1');
+  await page.waitForSelector('#ctl00_cph1_Login1_UserName');
+
+  await page.type('#ctl00_cph1_Login1_UserName', username);
+  await page.type('#ctl00_cph1_Login1_Password', password);
+  await page.click('#ctl00_cph1_Login1_LoginButton');
+
+  await page.waitForSelector('#ctl00_l_Stats_tb_SuperFind');
+  await page.type('#ctl00_l_Stats_tb_SuperFind', patientName);
+  await page.click('#ctl00_l_Stats_b_SuperFindGo');
+
+  await page.waitForSelector('table#someTableSelector, td[colspan="25"]');
+
+  const noInvoices = await page.evaluate(() => {
+  const cell = document.querySelector('td[colspan="25"]');
+  return cell?.innerText?.includes('No Invoices');
+});
+
+
+  if (noInvoices) {
+    // No invoices found
+    await page.goto('https://adent.winvoice.com/Invoices/CreateInvoice.aspx');
+
+    await page.waitForSelector('#ctl00_cph1_tb_patient');
+    await page.evaluate((name) => {
+    document.querySelector('#ctl00_cph1_tb_patient').value = name;
+    }, patientName);
+
+
+    } else {
+    // Invoices found
+    // Extract invoice number of first row - adjust selector as needed
+    const firstInvoiceNumber = await page.$eval('table#someTableSelector tbody tr:first-child td.invoiceNumberColumnSelector', el => el.innerText.trim());
+
+    await page.goto('https://adent.winvoice.com/Invoices/CreateInvoice.aspx');
+    await page.waitForSelector('#ctl00_cph1_b_Copy');
+    await page.click('#ctl00_cph1_b_Copy');
+
+    await page.waitForSelector('#ctl00_cph1_tb_Copy');
+    await page.type('#ctl00_cph1_tb_Copy', firstInvoiceNumber);
+
+    await page.click('#ctl00_cph1_b_Copy_Continue');
+}
+}
+
+module.exports = { loginAndFillWinvoice };
