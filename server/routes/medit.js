@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { loginAndScrapeMeditCases } = require('C:/Users/User/Desktop/BotWIP/dental-case-unifier/server/services/MeditBot.js');
+const { loginAndScrapeMeditCases } = require("../services/MeditBot.js");
 
 router.get('/cases', async (req, res) => {
   try {
