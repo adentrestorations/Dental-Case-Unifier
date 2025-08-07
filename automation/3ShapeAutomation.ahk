@@ -169,9 +169,7 @@ Click, 760, 400
 ; Read treatment data
 toothTreatmentMap := Object()
 filePath := "C:\Users\" . A_Username . "\Desktop\Case Automation\treatments.txt"
-MsgBox, %filePath%
 FileRead, rawText, %filePath%
-MsgBox, Raw text:`n%rawText%
 Loop, Parse, rawText, `n, `r
 {
     line := A_LoopField
@@ -385,5 +383,9 @@ if veneerClicked {
 Sleep, 200
 
 Click, 1750, 1025
+
+Sleep, 2000
+
+MsgBox, Done! :)
 
 return
