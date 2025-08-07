@@ -1,6 +1,7 @@
 const fs = require('fs');
 const pdfParse = require('pdf-parse');
 const path = require('path');
+const os = require("os");
 
 function getMostRecentPDFInRecentFolders(downloadsDir, days = 1) {
   const now = Date.now();
@@ -50,8 +51,11 @@ function getMostRecentPDFInRecentFolders(downloadsDir, days = 1) {
 const downloadsDir = path.join(require('os').homedir(), 'Downloads');
 const filePath = getMostRecentPDFInRecentFolders(downloadsDir, 1); // last 1 day
 
-const namesFile = "C:\\Users\\User\\Desktop\\Case Automation\\patient_info.txt"
-const treatmentsFile = "C:\\Users\\User\\Desktop\\Case Automation\\treatments.txt"
+
+const userHomeDir = os.homedir();
+
+const namesFile = path.join(userHomeDir, "Desktop", "Case Automation", "patient_info.txt");
+const treatmentsFile = path.join(userHomeDir, "Desktop", "Case Automation", "treatments.txt");
 
 async function parsePDF(filePath) {
 
