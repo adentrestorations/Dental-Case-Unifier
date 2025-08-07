@@ -6,7 +6,7 @@ SetWorkingDir %A_ScriptDir%
 ^!t::
 
 ; === 1. Look for latest iTero ZIP file ===
-zipFolder := "C:\Users\User\Downloads"
+zipFolder := "C:\Users\" . A_Username . "\Downloads"
 foundZip := ""
 lastModified := ""  ; Initialize for comparison
 
@@ -18,6 +18,26 @@ Loop, Files, %zipFolder%\*.zip, R
         foundZip := A_LoopFileFullPath
     }
 }
+
+baseDirMain := "C:\Users\" . A_Username . "\Desktop\BotWIP\dental-case-unifier"
+baseDirLab := "C:\Users\" . A_Username . "\Desktop\dental-case-unifier"
+
+if FileExist(baseDirMain)
+{
+    baseDir := baseDirMain
+}
+else if FileExist(baseDirLab)
+{
+    baseDir := baseDirLab
+}
+else
+{
+    MsgBox, Error: dental-case-unifier folder not found.
+    ExitApp
+}
+
+jsPath := baseDir . "\server\services\extractTreatments.js"
+
 
 if (foundZip = "")
 {
@@ -59,7 +79,7 @@ if (pdfPath = "")
 }
 
 ; === 6. Run extractTreatments.js on the PDF ===
-pdfExtractionCmd := "node C:\Users\User\Desktop\BotWIP\dental-case-unifier\server\services\extractTreatments.js """ . pdfPath . """"
+pdfExtractionCmd := "node """ . jsPath . """ """ . pdfPath . """"
 RunWait, %ComSpec% /c %pdfExtractionCmd%, , Hide
 
 
