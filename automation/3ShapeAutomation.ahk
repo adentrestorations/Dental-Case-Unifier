@@ -168,7 +168,10 @@ Click, 760, 400
 
 ; Read treatment data
 toothTreatmentMap := Object()
-FileRead, rawText, "C:\Users\" . A_Username . "\Desktop\Case Automation\treatments.txt"
+filePath := "C:\Users\" . A_Username . "\Desktop\Case Automation\treatments.txt"
+MsgBox, %filePath%
+FileRead, rawText, %filePath%
+MsgBox, Raw text:`n%rawText%
 Loop, Parse, rawText, `n, `r
 {
     line := A_LoopField
