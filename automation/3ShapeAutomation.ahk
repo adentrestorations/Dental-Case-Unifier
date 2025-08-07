@@ -20,7 +20,7 @@ Loop, Files, %zipFolder%\*.zip, R
 }
 
 baseDirMain := "C:\Users\" . A_Username . "\Desktop\BotWIP\dental-case-unifier"
-baseDirLab := "C:\Users\" . A_Username . "\Desktop\dental-case-unifier"
+baseDirLab := "C:\Users\" . A_Username . "\dental-case-unifier"
 
 if FileExist(baseDirMain)
 {
@@ -106,7 +106,7 @@ Click, 571, 385
 Sleep, 200
 
 ; Set the path to the file Puppeteer writes
-filePath := "C:\Users\User\Desktop\Case Automation\patient_info.txt"
+filePath := "C:\Users\" . A_Username . "\Desktop\Case Automation\patient_info.txt"
 
 ; Check if file exists
 If !FileExist(filePath) {
@@ -168,7 +168,7 @@ Click, 760, 400
 
 ; Read treatment data
 toothTreatmentMap := Object()
-FileRead, rawText, C:\Users\User\Desktop\Case Automation\treatments.txt
+FileRead, rawText, "C:\Users\" . A_Username . "\Desktop\Case Automation\treatments.txt"
 Loop, Parse, rawText, `n, `r
 {
     line := A_LoopField
