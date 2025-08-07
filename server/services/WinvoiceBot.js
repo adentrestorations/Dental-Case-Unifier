@@ -204,7 +204,11 @@ await page.click('#ctl00_cph1_b_SaveAndPrint');
     // Invoices found
     // Extract invoice number of first row - adjust selector as needed
     // const firstInvoiceNumber = await page.$eval('table#someTableSelector tbody tr:first-child td.invoiceNumberColumnSelector', el => el.innerText.trim());
+    await delay(500);
+
     await page.click('input#ctl00_cph1_gv1_ctl02_CBB');
+
+    await delay(500);
     await page.waitForSelector('input#ctl00_cph1_b_Edit2');
     await page.click('input#ctl00_cph1_b_Edit2');
 
