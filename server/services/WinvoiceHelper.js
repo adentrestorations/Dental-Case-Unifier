@@ -59,43 +59,27 @@ const treatmentsFile = path.join(userHomeDir, "Desktop", "Case Automation", "tre
 
 async function parsePDF(filePath) {
 
-function extractShades(pdfText) {
-  // Split text into lines
-  const lines = pdfText.split(/\r?\n/);
+function extractShades(rawText) {
+  const lines = rawText.split('\n').map(line => line.trim()).filter(Boolean);
+
+  const isLabelLine = (line) => {
+    const lower = line.toLowerCase();
+    return lower.includes('incisal') && lower.includes('body') && lower.includes('gingival');
+  };
 
   for (const line of lines) {
-    // Find first '/'
-    const firstSlashIndex = line.indexOf('/');
-    if (firstSlashIndex === -1) continue; // no slash on this line, skip
+    if (isLabelLine(line)) continue;
 
-    // Get word immediately after first slash
-    // To do this, extract substring from firstSlashIndex+1, then get first "word"
-    const afterSlash = line.slice(firstSlashIndex + 1).trim();
-    const wordAfterSlash = afterSlash.split(/\s+/)[0]; // first word after slash
+    const parts = line.split(/\s+/);
 
-    if (wordAfterSlash === 'Body') {
-      // skip this line
-      continue;
-    }
-
-    // Now try to extract the three parts separated by slashes
-    // Use a regex to capture pattern something/something/something
-    // Example pattern: -/A3.5/- or A2/A3/- or 3M2/3M2/3M2
-
-    // The pattern:
-    // Capture anything except slash (including '-') repeated 3 times separated by '/'
-    // We look anywhere in the line
-    const match = line.match(/([^\/\s]+)\/([^\/\s]+)\/([^\/\s]+)/);
-
-    if (match) {
-      // match[1], match[2], match[3] are the three shades
-      return [match[1], match[2], match[3]];
+    if (parts.length === 3 && parts.some(p => p.match(/^[a-dA-D]?\d{1,2}$/) || p === '-')) {
+      return parts;
     }
   }
 
-  // If no valid shade pattern found anywhere in text, return default
-  return ['-', '-', '-'];
+  return ['-', '-', '-']; // fallback if nothing is found
 }
+
 
 
 
