@@ -167,8 +167,8 @@ module.exports = {
     }
     
     const pdfData = await parsePDF(filePath);
-    const namesFile = "C:\\Users\\User\\Desktop\\Case Automation\\patient_info.txt";
-    const treatmentsFile = "C:\\Users\\User\\Desktop\\Case Automation\\treatments.txt";
+    const namesFile = path.join(userHomeDir, "Desktop", "Case Automation", "patient_info.txt");
+    const treatmentsFile = path.join(userHomeDir, "Desktop", "Case Automation", "treatments.txt");
     const txtData = parseTxtFiles(namesFile, treatmentsFile);
 
     return { 
