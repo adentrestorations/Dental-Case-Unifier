@@ -3,7 +3,13 @@ const pdfParse = require("pdf-parse");
 const path = require("path");
 
 const inputPath = process.argv[2];
-const outputPath = "C:/Users/User/Desktop/Case Automation/treatments.txt";
+const desktopPath = path.join(require("os").homedir(), "Desktop", "Case Automation");
+const outputPath = path.join(desktopPath, "treatments.txt");
+
+if (!fs.existsSync(desktopPath)) {
+  fs.mkdirSync(desktopPath, { recursive: true });
+}
+
 
 if (!inputPath) {
   console.error("Usage: node extractTreatments.js <path to PDF>");
