@@ -55,31 +55,45 @@ const treatmentsFile = "C:\\Users\\User\\Desktop\\Case Automation\\treatments.tx
 
 async function parsePDF(filePath) {
 
-function extractShades(shadeString) {
-  // Try to extract 3 parts separated by slashes, allowing "-" or shade text like "3M2"
-  const regex = /([A-Z0-9\-]+)?\s*\/\s*([A-Z0-9\-]+)?\s*\/\s*([A-Z0-9\-]+)?/i;
-  const match = shadeString.match(regex);
+function extractShades(pdfText) {
+  // Split text into lines
+  const lines = pdfText.split(/\r?\n/);
 
-  if (!match) {
-    return ['-', '-', '-']; // no match, return default
+  for (const line of lines) {
+    // Find first '/'
+    const firstSlashIndex = line.indexOf('/');
+    if (firstSlashIndex === -1) continue; // no slash on this line, skip
+
+    // Get word immediately after first slash
+    // To do this, extract substring from firstSlashIndex+1, then get first "word"
+    const afterSlash = line.slice(firstSlashIndex + 1).trim();
+    const wordAfterSlash = afterSlash.split(/\s+/)[0]; // first word after slash
+
+    if (wordAfterSlash === 'Body') {
+      // skip this line
+      continue;
+    }
+
+    // Now try to extract the three parts separated by slashes
+    // Use a regex to capture pattern something/something/something
+    // Example pattern: -/A3.5/- or A2/A3/- or 3M2/3M2/3M2
+
+    // The pattern:
+    // Capture anything except slash (including '-') repeated 3 times separated by '/'
+    // We look anywhere in the line
+    const match = line.match(/([^\/\s]+)\/([^\/\s]+)\/([^\/\s]+)/);
+
+    if (match) {
+      // match[1], match[2], match[3] are the three shades
+      return [match[1], match[2], match[3]];
+    }
   }
 
-  let [, incisal, body, gingival] = match;
-
-  incisal = incisal ? incisal.trim() : '-';
-  body = body ? body.trim() : '-';
-  gingival = gingival ? gingival.trim() : '-';
-
-  // Check if this looks like a date (all numeric and valid date)
-  const isDate = [incisal, body, gingival].every(part => /^\d+$/.test(part)) &&
-    !isNaN(Date.parse(`${body}/${incisal}/${gingival}`));
-
-  if (isDate) {
-    return ['-', '-', '-']; // it's a date, not shades
-  }
-
-  return [incisal, body, gingival];
+  // If no valid shade pattern found anywhere in text, return default
+  return ['-', '-', '-'];
 }
+
+
 
 
 
