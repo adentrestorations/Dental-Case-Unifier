@@ -72,7 +72,7 @@ function Shining3DCases() {
     padding: '1rem',
     border: '1px solid #ccc',
     borderRadius: '8px',
-    color: isRecent(c.receivedDate) ? 'green' : 'black',
+    color: isRecent(c.receivedDate) ? 'black' : 'red',
   }}
 >
               <div><strong>Doctor:</strong> {c.doctorName}</div>
