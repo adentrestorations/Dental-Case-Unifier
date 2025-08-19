@@ -5,7 +5,7 @@ SetWorkingDir %A_ScriptDir%
 
 ^!t::
 
-; === 1. Look for latest iTero ZIP file ===
+; === 1. Look for latest ZIP file ===
 zipFolder := "C:\Users\" . A_Username . "\Downloads"
 foundZip := ""
 lastModified := ""  ; Initialize for comparison
@@ -72,19 +72,21 @@ Loop, Files, %outputFolder%\*.pdf, R
     break  ; only open the first one
 }
 
-if (pdfPath = "")
+if (pdfPath = "") ;it's a medit case
 {
-    MsgBox, 16, ❌ Error, No PDF file found in extracted folder!
-    return
+    
 }
-
-; === 6. Run extractTreatments.js on the PDF ===
+else {
+    ; === 6. Run extractTreatments.js on the PDF ===
 pdfExtractionCmd := "node """ . jsPath . """ """ . pdfPath . """"
 RunWait, %ComSpec% /c %pdfExtractionCmd%, , Hide
 
 
 ; === 7. Open PDF in browser (or default app) ===
 Run, %pdfPath%
+}
+
+
 
 Sleep, 2000
 

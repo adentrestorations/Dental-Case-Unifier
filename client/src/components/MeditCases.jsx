@@ -4,9 +4,10 @@ export default function MeditCases() {
   const [cases, setCases] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+const [downloadingId, setDownloadingId] = useState(null); // track which case is downloading
 
   useEffect(() => {
-    fetch('http://192.168.86.40:5000/api/medit/cases')
+    fetch(`${process.env.REACT_APP_API_BASE}/api/medit/cases`)
       .then((res) => {
         if (!res.ok) throw new Error('Network response was not ok');
         return res.json();
@@ -22,11 +23,30 @@ export default function MeditCases() {
   }, []);
 
   if (loading) return <p>Loading Medit cases...</p>;
-  if (error) return <p>Error: {error}</p>;
+  if (error) {return <p>Error: {error}</p>;}
 
   const pendingCases = cases.filter(
     (item) => item.status && item.status.toLowerCase() === 'pending'
   );
+
+  const handleDownload = async (orderId) => {
+    setDownloadingId(orderId);
+    try {
+      const res = await fetch(`${process.env.REACT_APP_API_BASE}/api/medit/download`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ orderId }),
+      });
+      const data = await res.json();
+      if (!data.success) throw new Error(data.error || "Download failed");
+      alert(`Scan for Order ${orderId} downloaded successfully!`);
+    } catch (err) {
+      console.error(err);
+      alert(`Failed to download scan for Order ${orderId}.`);
+    } finally {
+      setDownloadingId(null);
+    }
+  };
 
   return (
     <div>
@@ -44,7 +64,13 @@ export default function MeditCases() {
               <strong>Due Date:</strong> {item.updatedAt ? new Date(item.updatedAt).toLocaleDateString() : 'N/A'}<br />
               <strong>Procedure:</strong> {"Unknown"}<br />
               <strong>Order ID:</strong> {item.orderId}<br />
-              <strong>Status:</strong> {item.status}
+              <strong>Status:</strong> {item.status}<br />
+               <button
+                onClick={() => handleDownload(item.orderId)}
+                disabled={downloadingId === item.orderId}
+              >
+                {downloadingId === item.orderId ? "Downloading..." : "Download Scan"}
+              </button>
             </li>
           ))}
         </ul>

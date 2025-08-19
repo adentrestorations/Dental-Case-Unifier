@@ -75,7 +75,7 @@ function IteroCases() {
                   fontSize: 'inherit',
                 }}
               >
-                🔽 Download Scan
+                Download Scan
               </button>
             </li>
           ))}

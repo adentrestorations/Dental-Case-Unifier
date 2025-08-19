@@ -5,7 +5,7 @@ function isRecent(receivedDateStr) {
   const receivedDate = new Date(receivedDateStr);
   const today = new Date();
   const threeDaysAgo = new Date();
-  threeDaysAgo.setDate(today.getDate() - 7);
+  threeDaysAgo.setDate(today.getDate() - 1);
 
   return receivedDate >= threeDaysAgo;
 }
@@ -57,14 +57,21 @@ function Shining3DCases() {
   if (loading) return <p>Loading Shining3D cases...</p>;
   if (error) return <p style={{ color: 'red' }}>{error}</p>;
 
+  // Filter for pending only, sort by receivedDate descending, then take 5
+const pendingRecentCases = safeCases
+  .filter(c => c.status && c.status.toLowerCase() === 'pending')
+  .sort((a, b) => new Date(b.receivedDate) - new Date(a.receivedDate))
+  .slice(0, 5);
+
+
   return (
     <div>
-      <h2>Five Most Recent Shining Cases</h2>
-      {safeCases.length === 0 ? (
+      <h2>Shining3D Cases</h2>
+      {pendingRecentCases.length === 0 ? (
         <p>No Shining3D cases found.</p>
       ) : (
         <ul style={{ listStyleType: 'none', paddingLeft: 0 }}>
-          {safeCases.map((c) => (
+          {pendingRecentCases.map((c) => (
             <li
   key={c.orderId}
   style={{
@@ -97,7 +104,7 @@ function Shining3DCases() {
                   fontSize: 'inherit',
                 }}
               >
-                Download Scan
+                This Button Does Nothing
               </button>
             </li>
           ))}
