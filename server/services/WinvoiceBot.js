@@ -1,6 +1,8 @@
 const puppeteer = require('puppeteer');
 const path = require('path');
 const { getCombinedWinvoiceData } = require('./WinvoiceHelper');
+require('dotenv').config({ path: './.env.shared' }); // adjust path if needed
+
 
 function delay(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
@@ -94,6 +96,13 @@ async function loginAndFillWinvoice(username, password) {
   const select = document.querySelector('#ctl00_cph1_ddl_shipto');
   const options = Array.from(select.options);
   const matchingOption = options.find(o => o.text.trim().startsWith(titleCase(doctorName.trim())));
+
+  // if (doctor === "Vahid Varasteh" && (address.toLowerCase().includes("north"))) {
+  //   const newDoctor = "Vahid Varasteh, DMD"
+  // }
+  // else {
+  //   const newDoctor = doctor;
+  // }
 
   if (matchingOption) {
     select.value = matchingOption.value;
@@ -211,6 +220,7 @@ await page.click('#ctl00_cph1_b_SaveAndPrint');
     await delay(500);
     await page.waitForSelector('input#ctl00_cph1_b_Edit2');
     await page.click('input#ctl00_cph1_b_Edit2');
+    await delay(500);
 
 await page.waitForSelector('#ctl00_cph1_l_InvoiceID', { timeout: 2500 });
 const invoiceId = await page.$eval('#ctl00_cph1_l_InvoiceID', el => el.textContent.trim());

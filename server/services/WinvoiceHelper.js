@@ -59,26 +59,187 @@ const treatmentsFile = path.join(userHomeDir, "Desktop", "Case Automation", "tre
 
 async function parsePDF(filePath) {
 
+
 function extractShades(rawText) {
-  const lines = rawText.split('\n').map(line => line.trim()).filter(Boolean);
 
-  const isLabelLine = (line) => {
-    const lower = line.toLowerCase();
-    return lower.includes('incisal') && lower.includes('body') && lower.includes('gingival');
-  };
+    function isPossibleDate(parts) {
+  if (!Array.isArray(parts) || parts.length !== 3) return false;
 
-  for (const line of lines) {
-    if (isLabelLine(line)) continue;
+  const [month, day, year] = parts.map(p => parseInt(p, 10));
 
-    const parts = line.split(/\s+/);
+  // Check for valid numeric ranges
+  if (
+    Number.isNaN(month) || Number.isNaN(day) || Number.isNaN(year) ||
+    month < 1 || month > 12 ||
+    day < 1 || day > 31 ||
+    year < 1000 || year > 9999
+  ) {
+    return false;
+  }
 
-    if (parts.length === 3 && parts.some(p => p.match(/^[a-dA-D]?\d{1,2}$/) || p === '-')) {
-      return parts;
+  // Extra validation for day based on month/year
+  const date = new Date(year, month - 1, day);
+  return (
+    date.getFullYear() === year &&
+    date.getMonth() === month - 1 &&
+    date.getDate() === day
+  );
+}
+
+    function subShades(sh) {
+        const validShades = ['-', '0M1', '1M1', '1M2', '2L1.5', '2L2.5', '2M1', '2M2', '2M3', '2R1.5', '2R2.5', '3L1.5', '3L2.5', '3M1', '3M2', '3M3', '3R1.5', '3R2.5', '4L1.5', '4L2.5', '4M1', '4M2', '4M3', '4R1.5', '4R2.5', '5M1', '5M2', '5M3', '440', 'O40', '110', 'A1', 'A2', 'A3', 'A3.5', 'A4', 'B1', 'B2', 'C1', 'C2', 'C3', 'C4', 'D1', 'D2', 'D3', 'D4', 'OM2']
+         for (const shade of validShades) {
+    if (sh.includes(shade)) {
+      return shade;
     }
   }
 
-  return ['-', '-', '-']; // fallback if nothing is found
+  // If nothing matched, keep original or fallback
+  return sh;
+    }
+  const lines = rawText.split(/\r?\n/); // split into lines (Windows/Unix safe)
+
+  for (const line of lines) {
+    const firstSlash = line.indexOf('/');
+    const secondSlash = line.indexOf('/', firstSlash + 1);
+
+    // Check if two slashes exist and skip unwanted patterns
+    if (
+      firstSlash !== -1 &&
+      secondSlash !== -1 &&
+      !(line.includes('/Body')) &&
+      !(line.includes('/Gi'))
+    ) {
+      // Text between slashes → shade2
+      let shade2 = line.slice(firstSlash + 1, secondSlash);
+
+      // Text after second slash until space/newline → shade3
+      const afterSecond = line.slice(secondSlash + 1);
+      let stopIndex = afterSecond.search(/[\s\n]/);
+      if (stopIndex === -1) stopIndex = afterSecond.length;
+      let shade3 = afterSecond.slice(0, stopIndex);
+
+      // Text before first slash until space or dash → shade1
+      let startIndex = firstSlash - 1;
+      while (startIndex >= 0 && line[startIndex] !== ' ' && line[startIndex] !== '-') {
+        startIndex--;
+      }
+      let shade1 = line.slice(startIndex + 1, firstSlash);
+
+       if (shade1.trim() === '') {
+        shade1 = '-';
+      }
+
+      let currentShades = [subShades(shade1), shade2, shade3]
+
+      if (!(isPossibleDate(currentShades))) {
+        return currentShades;
+      }
+    }
+  }
+
+  // If nothing matched
+  return ['-', '-', '-'];
 }
+
+
+
+
+
+
+
+// function extractShades(rawText) {
+//   const shadesArray = [];
+//   const lines = rawText.split(/\r?\n/); // split by newline
+  
+//   for (let index = 0; index < lines.length; index++) {
+//     const line = lines[index];
+//     console.log(`Line ${index + 1}: ${line}`);
+
+//     const firstSlash = line.indexOf("/");
+//     if (firstSlash === -1) continue;
+
+//     const secondSlash = line.indexOf("/", firstSlash + 1);
+//     if (secondSlash === -1) continue;
+
+//     const shade2 = line.slice(firstSlash + 1, secondSlash);
+
+//     // Skip unwanted prefixes
+//     if (shade2.startsWith("Body") || shade2.startsWith("Gi")) continue;
+
+//     // Get shade3: rest of word after second slash until space/newline
+//     const afterSecond = line.slice(secondSlash + 1);
+//     let stopIndex = afterSecond.search(/\s/);
+//     if (stopIndex === -1) stopIndex = afterSecond.length;
+//     const shade3 = afterSecond.slice(0, stopIndex);
+
+//     // Get shade1: text before first slash, stopping at space or dash
+//     let startIndex = firstSlash - 1;
+//     while (startIndex >= 0 && line[startIndex] !== " " && line[startIndex] !== "-") {
+//       startIndex--;
+//     }
+//     const shade1 = line.slice(startIndex + 1, firstSlash);
+
+//     shadesArray.push([shade1, shade2, shade3]);
+//   }
+
+//   return shadesArray.length ? shadesArray : ["-", "-", "-"];
+// }
+
+
+// function extractShades(rawText) { //this function takes a raw text and outputs the shades found.
+//   const shadesArray = [];
+//   const lines = rawText.split(/\r?\n/); // split by newline, handle Windows & Unix
+//   lines.forEach((line, index) => {
+//     console.log(`Line ${index + 1}: ${line}`);
+//     for (let i = 1; i < line.length; i++) {
+//       if (line.charAt(i) === `/`) {
+//         if (!(line.charAt(i + 1) === `B` && line.charAt(i + 2) === `o` && line.charAt(i + 3) === `d` && line.charAt(i + 4) === `y`) && !(line.charAt(i + 1) === `G` && line.charAt(i + 2) === `i`)) {
+//           const first = line.indexOf(`/`);
+//           const second = line.indexOf(`/`, first);
+//           if (first === -1 || second === -1) {
+//             //do nothing
+//           }
+//           else {
+//             const diff = second - first - 1;
+//             let shade2 = line.slice(first + 1, second);
+
+//             const afterSecond = text.slice(second + 1);
+
+//             // Find first space or newline
+//             let stopIndex = afterSecond.search(/[\s\n]/);
+//             if (stopIndex === -1) stopIndex = afterSecond.length;
+
+//             let shade3 = afterSecond.slice(0, stopIndex);
+
+//             const firstSlashIndex = text.indexOf("\\");
+//             if (firstSlashIndex === -1) return null;
+
+//             // Look backwards from the slash
+//             let startIndex = firstSlashIndex - 1;
+//             while (startIndex >= 0 && text[startIndex] !== " " && text[startIndex] !== "-") {
+//               startIndex--;
+//             }
+
+//             // Slice from the char after the space/dash up to the slash
+//             let shade1 = text.slice(startIndex + 1, firstSlashIndex);
+
+//             return [shade1, shade2, shade3];
+//           }
+//         }
+//       }
+//     }
+//   });
+//   return [`-`, `-`, `-`];
+// }
+
+
+
+
+
+
+
+
 
 
 

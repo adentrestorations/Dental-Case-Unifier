@@ -1,6 +1,13 @@
 const express = require('express');
 const cors = require('cors');
-require('dotenv').config();
+const path = require('path');
+const dotenv = require('dotenv');
+
+// Load shared environment variables first
+dotenv.config({ path: path.resolve(__dirname, '../.env.shared') });
+
+// Load local (machine-specific) variables second, overriding shared if duplicates
+dotenv.config({ path: path.resolve(__dirname, '../.env.local') });
 
 const app = express();
 app.use(cors());
@@ -11,15 +18,14 @@ const iteroRoutes = require('./routes/itero');
 const downloadRoutes = require('./routes/download');
 const shining3dRoutes = require('./routes/shining3d');
 const meditRoutes = require('./routes/medit');
+const automationRoute = require('./routes/automation');
 
 // Use routes
 app.use('/api/itero', iteroRoutes);
 app.use('/api', downloadRoutes);
 app.use('/api/shining3d', shining3dRoutes);
 app.use('/api/medit', meditRoutes);
+app.use('/api', automationRoute);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, '0.0.0.0', () => console.log(`Server running on port ${PORT}`));
-
-const automationRoute = require('./routes/automation');
-app.use('/api', automationRoute);
