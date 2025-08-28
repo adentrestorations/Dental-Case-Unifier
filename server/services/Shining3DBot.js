@@ -1,5 +1,4 @@
 const puppeteer = require('puppeteer');
-require('dotenv').config();
 const path = require('path');
 const os = require('os');
 

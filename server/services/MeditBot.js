@@ -1,7 +1,6 @@
 // bots/meditBot.js
 const path = require('path');
 const fs = require('fs');
-require('dotenv').config({ path: '../.env.shared' }); // adjust path if needed
 const puppeteer = require('puppeteer');
 
 const email = process.env.MEDIT_USERNAME;
