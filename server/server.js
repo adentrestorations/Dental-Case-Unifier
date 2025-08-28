@@ -22,10 +22,10 @@ const automationRoute = require('./routes/automation');
 
 // Use routes
 app.use('/api/itero', iteroRoutes);
-app.use('/api', downloadRoutes);
 app.use('/api/shining3d', shining3dRoutes);
 app.use('/api/medit', meditRoutes);
-app.use('/api', automationRoute);
+app.use('/api/download', downloadRoutes);
+app.use('/api/automation', automationRoute);
 
 // Serve static React files
 app.use(express.static(path.join(__dirname, "../client/build")));
