@@ -27,17 +27,18 @@ const staticPath = path.join(__dirname, "../client/build");
 console.log(`DEBUG: Registering static path for client build: '${staticPath}'`);
 app.use(express.static(staticPath));
 
-// --- REINTRODUCE CATCH-ALL ROUTE FOR REACT APP ---
-console.log("DEBUG: Registering catch-all '*' route for index.html.");
-app.get("*", (req, res) => {
-  console.log(`DEBUG: Catch-all route hit for: ${req.originalUrl}`);
-  res.sendFile(path.join(staticPath, "index.html"));
-});
-
 // ADDED a simple test route just to ensure *some* server API works
 console.log("DEBUG: Registering simple test route '/test'.");
 app.get('/test', (req, res) => {
   res.send('Server is alive and test route works!');
+});
+
+// --- REINTRODUCE ROBUST CATCH-ALL ROUTE FOR REACT APP ---
+// This handles all GET requests not matched by preceding routes and serves index.html
+console.log("DEBUG: Registering robust catch-all route for SPA.");
+app.use((req, res) => {
+  console.log(`DEBUG: Catch-all route hit for: ${req.originalUrl}`);
+  res.sendFile(path.join(staticPath, "index.html"));
 });
 
 console.log('--- DEBUG: All Routes Registered ---');
