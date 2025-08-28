@@ -6,8 +6,12 @@ const dotenv = require('dotenv');
 // Load shared environment variables first
 dotenv.config({ path: path.resolve(__dirname, './.env.shared') });
 
-// // Load local (machine-specific) variables second, overriding shared if duplicates
+// REMOVED: The server should NOT load client-side .env files like .env.local
 // dotenv.config({ path: path.resolve(__dirname, '../client/.env.local') });
+
+// --- DEBUG: Log the problematic variable on Render ---
+console.log('DEBUG: process.env.REACT_APP_API_BASE on server startup:', process.env.REACT_APP_API_BASE);
+// --- END DEBUG ---
 
 const app = express();
 app.use(cors());
