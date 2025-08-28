@@ -1,17 +1,11 @@
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
-const dotenv = require('dotenv');
+// const dotenv = require('dotenv'); // Not needed for dotenv.config calls in deployed environment
 
-// Load shared environment variables first
-dotenv.config({ path: path.resolve(__dirname, './.env.shared') });
-
-// REMOVED: The server should NOT load client-side .env files like .env.local
-// dotenv.config({ path: path.resolve(__dirname, '../client/.env.local') });
-
-// --- DEBUG: Log the problematic variable on Render ---
-console.log('DEBUG: process.env.REACT_APP_API_BASE on server startup:', process.env.REACT_APP_API_BASE);
-// --- END DEBUG ---
+// REMOVED: All dotenv.config calls. Environment variables should be set directly on Render.
+// dotenv.config({ path: path.resolve(__dirname, './.env.shared') });
+// dotenv.config({ path: path.resolve(__dirname, '../client/.env.local') }); // Already removed
 
 const app = express();
 app.use(cors());
@@ -38,5 +32,6 @@ app.get("*", (req, res) => {
   res.sendFile(path.join(__dirname, "../client/build", "index.html"));
 });
 
+// Render will automatically set process.env.PORT
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, '0.0.0.0', () => console.log(`Server running on port ${PORT}`));
