@@ -1,5 +1,7 @@
 const puppeteer = require('puppeteer');
 require('dotenv').config();
+const path = require('path');
+const os = require('os');
 
 function delay(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
@@ -123,4 +125,157 @@ async function loginAndFetchShiningCases(username, password) {
   }
 }
 
-module.exports = { loginAndFetchShiningCases };
+async function downloadShining3DCase(caseId) {
+  // Assume page is already logged in and on the Pending tab
+async function clickCaseByDate(page, targetDate) {
+  // Wait for the table rows
+  await page.waitForSelector('tr.el-table__row', { visible: true });
+
+  // Find the row index with the matching date
+  const rowIndex = await page.evaluate((targetDate) => {
+    const rows = Array.from(document.querySelectorAll('tr.el-table__row'));
+    for (let i = 0; i < rows.length; i++) {
+      const dateCell = rows[i].querySelector('td');
+      const dateText = dateCell?.innerText.trim();
+      if (dateText && dateText.startsWith(targetDate)) { // match YYYY-MM-DD
+        return i;
+      }
+    }
+    return -1;
+  }, targetDate);
+
+  if (rowIndex === -1) {
+    console.log(`No case found for date: ${targetDate}`);
+    return false;
+  }
+
+  // Click the matching row
+  const rows = await page.$$('tr.el-table__row');
+  await rows[rowIndex].click();
+  console.log(`Clicked case row for date: ${targetDate}`);
+  return true;
+}
+  const username = process.env.SHINING_USERNAME;
+  const password = process.env.SHINING_PASSWORD;
+
+  const browser = await puppeteer.launch({
+  headless: false, // so you can see it
+  args: [
+    '--no-sandbox',
+    '--disable-setuid-sandbox',
+    '--disable-blink-features=AutomationControlled',
+    '--start-maximized', // start Chrome maximized
+  ],
+  defaultViewport: null, // important to use full window size
+});
+const page = await browser.newPage();
+
+  // Optional: set a download folder
+  const client = await page.target().createCDPSession();
+  const downloadPath1 = path.join(os.homedir(), 'Downloads');
+  await client.send('Page.setDownloadBehavior', { behavior: 'allow', downloadPath: downloadPath1 });
+
+  try {
+    // --- Login ---
+    await page.goto('https://s.dental3dcloud.com/p/index?dental_reditect=/u/cases', { waitUntil: 'networkidle2' });
+    // Wait for cookies banner then click accept if possible
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    try {
+      const cookieButtonSelector = 'button.xl-button.xl-button__primary span span[style*="color: var(--oem-default-color)"]';
+      await page.waitForSelector(cookieButtonSelector, { visible: true, timeout: 10000 });
+      await page.click(cookieButtonSelector);
+      console.log('Clicked Accept Cookies button.');
+    } catch {
+      console.log('Accept Cookies button not found or not clickable, skipping...');
+    }
+
+    // Login form
+    await page.waitForSelector('input.el-input__inner[placeholder*="phone number"], input.el-input__inner[placeholder*="email"]', { visible: true });
+    await page.type('input.el-input__inner[placeholder*="phone number"], input.el-input__inner[placeholder*="email"]', username, { delay: 50 });
+
+    await page.waitForSelector('input.el-input__inner[type="password"]', { visible: true });
+    await page.type('input.el-input__inner[type="password"]', password, { delay: 50 });
+
+    console.log('Clicking Sign In...');
+    await page.click('button.xl-button.xl-button__primary.login-btn');
+
+    await delay(8000);
+
+    const targetDate = '2025-08-26'; // match just the YYYY-MM-DD part
+await clickCaseByDate(page, targetDate);
+
+await delay(3000);
+
+await page.waitForSelector('span.xl-tabs-title', { visible: true });
+
+const tabs = await page.$$('span.xl-tabs-title');
+for (const tab of tabs) {
+  const text = await (await tab.getProperty('textContent')).jsonValue();
+  if (text.trim() === 'Download') {
+    await tab.click();
+    console.log("Clicked the 'Download' tab.");
+    break;
+  }
+}
+
+await delay(3000);
+
+const items = await page.$$('.v-list-item.detailDown-item');
+
+for (const item of items) {
+  // Check the file type
+  const typeSpan = await item.$('span.detailDownType');
+  if (typeSpan) {
+    const typeText = await page.evaluate(el => el.textContent.trim(), typeSpan);
+    if (typeText.toLowerCase().includes('ply')) {
+      // Click the download button inside this item
+      const downloadBtn = await item.$('i.dwon-btn');
+      if (downloadBtn) {
+        await downloadBtn.click();
+        console.log('Clicked download for PLY file.');
+      }
+      break; // Stop after finding the first PLY
+    }
+  }
+}
+
+await delay(20000);
+
+await delay(2000);
+const labs = await page.$$('span.xl-tabs-title');
+for (const tab of labs) {
+  const text = await (await tab.getProperty('textContent')).jsonValue();
+  if (text.trim() === 'Details') {
+    await tab.click();
+    console.log("Clicked the 'Details' tab.");
+    break;
+  }
+}
+
+await delay(2000);
+await page.evaluate(() => {
+  const btn = [...document.querySelectorAll('div.dt-btn.shbg')].find(el => el.textContent.trim() === 'Confirm Case');
+  if (btn) btn.click();
+});
+
+await delay(2000);
+await page.evaluate(() => {
+  const icon = document.querySelector('i.icon-dayin3.isButton.xl-icon.icon.iconfont.el-tooltip__trigger');
+  if (icon) icon.click();
+});
+
+
+// await page.waitForSelector('i.icon-dayin3.isButton', { visible: true });
+// await page.click('i.icon-dayin3.isButton');
+
+// await delay(3000);
+
+  } catch (err) {
+    console.error('Error in downloadShining3DCase:', err);
+    throw err;
+  } finally {
+    // await browser.close(); // keep open while testing clicks
+  }
+}
+
+module.exports = { loginAndFetchShiningCases, downloadShining3DCase };

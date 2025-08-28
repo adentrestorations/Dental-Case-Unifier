@@ -9,9 +9,6 @@ router.get('/cases', async (req, res) => {
     const username = process.env.SHINING_USERNAME;
     const password = process.env.SHINING_PASSWORD;
 
-    console.log('Env SHINING_USERNAME:', username);
-    console.log('Env SHINING_PASSWORD:', password ? '******' : undefined);
-
     console.log("Calling loginAndFetchShiningCases with:", { username, password });
 
     const data = await loginAndFetchShiningCases(username, password);
@@ -19,6 +16,18 @@ router.get('/cases', async (req, res) => {
   } catch (err) {
     console.error('Error fetching Shining3D cases:', err);
     res.status(500).json({ error: 'Failed to fetch Shining3D cases.' });
+  }
+});
+
+const { downloadShining3DCase } = require('../services/Shining3DBot');
+
+router.post('/download', async (req, res) => {
+  const { caseId } = req.body;
+  try {
+    const path = await downloadShining3DCase(caseId);
+    res.json({ success: true, path });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
   }
 });
 

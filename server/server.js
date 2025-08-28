@@ -4,10 +4,10 @@ const path = require('path');
 const dotenv = require('dotenv');
 
 // Load shared environment variables first
-dotenv.config({ path: path.resolve(__dirname, '../.env.shared') });
+dotenv.config({ path: path.resolve(__dirname, './.env.shared') });
 
 // Load local (machine-specific) variables second, overriding shared if duplicates
-dotenv.config({ path: path.resolve(__dirname, '../.env.local') });
+dotenv.config({ path: path.resolve(__dirname, '../client/.env.local') });
 
 const app = express();
 app.use(cors());
