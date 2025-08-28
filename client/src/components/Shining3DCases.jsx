@@ -27,7 +27,7 @@ function Shining3DCases() {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    fetch('http://192.168.86.40:5000/api/shining3d/cases')
+    fetch(`${process.env.REACT_APP_API_BASE}/api/shining3d/cases`)
       .then((res) => {
         if (!res.ok) throw new Error('Network response was not ok');
         return res.json();
@@ -91,7 +91,7 @@ const pendingRecentCases = safeCases
               <div><strong>Order ID:</strong> {c.orderId}</div>
               <div><strong>Status:</strong> {c.status}</div>
 
-              <button
+              {/* <button
                 onClick={() => handleDownloadClick(c.orderId)}
                 style={{
                   color: 'blue',
@@ -104,8 +104,8 @@ const pendingRecentCases = safeCases
                   fontSize: 'inherit',
                 }}
               >
-                This Button Does Nothing
-              </button>
+                Print & Download
+              </button> */}
             </li>
           ))}
         </ul>

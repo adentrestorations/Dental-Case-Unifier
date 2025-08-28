@@ -65,12 +65,12 @@ const [downloadingId, setDownloadingId] = useState(null); // track which case is
               <strong>Procedure:</strong> {"Unknown"}<br />
               <strong>Order ID:</strong> {item.orderId}<br />
               <strong>Status:</strong> {item.status}<br />
-               <button
+               {/* <button
                 onClick={() => handleDownload(item.orderId)}
                 disabled={downloadingId === item.orderId}
               >
                 {downloadingId === item.orderId ? "Downloading..." : "Download Scan"}
-              </button>
+              </button> */}
             </li>
           ))}
         </ul>
