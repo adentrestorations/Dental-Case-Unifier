@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { loginAndScrapeMeditCases, PrintRx } = require("../services/MeditBot.js");
+const { loginAndScrapeMeditCases, printRx } = require("../services/MeditBot.js");
 
 router.get('/cases', async (req, res) => {
   try {
